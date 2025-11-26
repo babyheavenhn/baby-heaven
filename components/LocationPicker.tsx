@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation, Loader2 } from 'lucide-react';
 
 interface LocationPickerProps {
@@ -7,8 +7,20 @@ interface LocationPickerProps {
     initialAddress?: string;
 }
 
-export default function LocationPicker({ onLocationSelect }: LocationPickerProps) {
+export default function LocationPicker({ onLocationSelect, initialAddress }: LocationPickerProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [manualAddress, setManualAddress] = useState(initialAddress || '');
+
+    // Detect mobile on mount
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleUseMyLocation = () => {
         if (!navigator.geolocation) {
@@ -67,24 +79,58 @@ export default function LocationPicker({ onLocationSelect }: LocationPickerProps
         );
     };
 
+    const handleManualAddressSubmit = () => {
+        if (manualAddress.trim()) {
+            // For desktop manual entry, use fixed delivery cost (105 LPS)
+            // Pass dummy coords to indicate manual address was used
+            onLocationSelect(manualAddress.trim(), { lat: 0, lng: 0 });
+        }
+    };
+
+    // Mobile: Show geolocation button
+    if (isMobile) {
+        return (
+            <button
+                type="button"
+                onClick={handleUseMyLocation}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/60 disabled:cursor-wait text-white font-bold py-3 px-4 rounded-lg transition-colors text-sm"
+            >
+                {isLoading ? (
+                    <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Obteniendo ubicación...</span>
+                    </>
+                ) : (
+                    <>
+                        <Navigation size={18} />
+                        <span>Usar Mi Ubicación</span>
+                    </>
+                )}
+            </button>
+        );
+    }
+
+    // Desktop: Show text input for manual address
     return (
-        <button
-            type="button"
-            onClick={handleUseMyLocation}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/60 disabled:cursor-wait text-white font-bold py-3 px-4 rounded-lg transition-colors text-sm"
-        >
-            {isLoading ? (
-                <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Obteniendo ubicación...</span>
-                </>
-            ) : (
-                <>
-                    <Navigation size={18} />
-                    <span>Usar Mi Ubicación</span>
-                </>
-            )}
-        </button>
+        <div className="space-y-2">
+            <input
+                type="text"
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                placeholder="Ingrese su dirección completa"
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:border-primary transition-colors"
+            />
+            <button
+                type="button"
+                onClick={handleManualAddressSubmit}
+                disabled={!manualAddress.trim()}
+                className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors text-sm"
+            >
+                <Navigation size={18} />
+                <span>Confirmar Dirección</span>
+            </button>
+            <p className="text-gray-500 text-xs text-center">Envío a domicilio: L. 105</p>
+        </div>
     );
 }

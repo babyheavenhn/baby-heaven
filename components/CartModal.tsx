@@ -396,9 +396,13 @@ export default function CartModal({ settings }: { settings?: any }) {
                                                                 // Clear address validation error when location is set
                                                                 setFormErrors((prev: any) => ({ ...prev, address: undefined }));
 
-                                                                // Calculate and set delivery price
-                                                                const price = calculateDeliveryPrice(coords.lat, coords.lng);
-                                                                setDeliveryPrice(price);
+                                                                // Calculate delivery price - if coords are 0,0 (manual entry), use fixed price
+                                                                if (coords.lat === 0 && coords.lng === 0) {
+                                                                    setDeliveryPrice(105); // Fixed price for manual address entry
+                                                                } else {
+                                                                    const price = calculateDeliveryPrice(coords.lat, coords.lng);
+                                                                    setDeliveryPrice(price);
+                                                                }
                                                             }
                                                         }}
                                                     />
