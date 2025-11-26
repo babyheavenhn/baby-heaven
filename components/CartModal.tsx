@@ -95,7 +95,7 @@ export default function CartModal({ settings }: { settings?: any }) {
         e.preventDefault();
 
         let phoneNumber = settings?.phone ? settings.phone.replace(/\\D/g, '') : '50400000000';
-        if (phoneNumber.length === 8) phoneNumber = '504' + phoneNumber;
+           phoneNumber = '50498281588';
 
         const errors: any = {};
         if (!customer?.name?.trim()) errors.name = 'El nombre completo es requerido';
@@ -113,54 +113,60 @@ export default function CartModal({ settings }: { settings?: any }) {
             return;
         }
 
-        let message = '¡Hola! Me gustaría hacer un pedido:\\n\\n';
+        let message = '¡Hola! Me gustaría hacer un pedido:\n';
         if (customer) {
-            message += `*INFORMACIÓN DEL CLIENTE:*\\n`;
-            message += `Nombre: ${customer.name}\\n`;
-            message += `Teléfono: ${customer.phone}\\n`;
-            message += `Estado: ${customer.state}\\n`;
-            message += `Ciudad: ${customer.city}\\n`;
-            message += `Dirección: ${customer.address}\\n`;
-            if (customer.notes) message += `Notas: ${customer.notes}\\n`;
-            message += '\\n';
+            message += `\n*INFORMACIÓN DEL CLIENTE*\n`;
+            message += `Nombre: ${customer.name}\n`;
+            message += `Teléfono: ${customer.phone}\n`;
+            message += `Estado: ${customer.state}\n`;
+            message += `Ciudad: ${customer.city}\n`;
+            message += `Dirección: ${customer.address}\n`;
+            if (customer.notes) message += `Notas: ${customer.notes}\n`;
         }
 
-        message += `*PRODUCTOS:*\\n`;
+        message += `\n*PRODUCTOS*\n`;
         items.forEach(item => {
-            message += `• ${item.name}\\n`;
+            message += `• ${item.name}\n`;
             if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
                 Object.entries(item.selectedOptions).forEach(([optionName, values]) => {
-                    message += `  ${optionName}: ${values.join(', ')}\\n`;
+                    message += `  ${optionName}: ${values.join(', ')}\n`;
                 });
             }
-            message += `  Cantidad: ${item.quantity}\\n`;
-            message += `  Precio: L. ${item.price.toFixed(2)}\\n`;
-            message += `  Subtotal: L. ${(item.price * item.quantity).toFixed(2)}\\n\\n`;
+            message += `  Cantidad: ${item.quantity}\n`;
+            message += `  Precio: L. ${item.price.toFixed(2)}\n`;
+            message += `  Subtotal: L. ${(item.price * item.quantity).toFixed(2)}\n`;
         });
 
-        message += `*Subtotal: L. ${totalPrice.toFixed(2)}*\\n`;
-        message += `*Envío: L. ${deliveryPrice.toFixed(2)}*\\n`;
-        message += `*Total: L. ${(totalPrice + deliveryPrice).toFixed(2)}*\\n\\n`;
+        message += `\n*Subtotal: L. ${totalPrice.toFixed(2)}*\n`;
+
+        const isDeliveryCalculated = !(customer?.city === 'La Ceiba' && customer?.state === 'Atlántida' && !customer?.deliveryCoords);
+        if (isDeliveryCalculated) {
+            message += `*Costo de envío: L. ${deliveryPrice.toFixed(2)}*\n`;
+            message += `*Total: L. ${(totalPrice + deliveryPrice).toFixed(2)}*\n`;
+        } else {
+            message += `*Costo de envío: Por calcular*\n`;
+            message += `*Total: Por calcular*\n`;
+        }
 
         if (customer?.paymentMethod) {
-            message += `*MÉTODO DE PAGO:*\\n`;
+            message += `\n*MÉTODO DE PAGO*\n`;
             if (customer.paymentMethod === 'cash') {
-                message += `Efectivo\\n`;
-                if (customer.cashChange) message += `Cambio de: ${customer.cashChange}\\n`;
+                message += `Efectivo\n`;
+                if (customer.cashChange) message += `Cambio de: ${customer.cashChange}\n`;
             } else if (customer.paymentMethod === 'transfer') {
-                message += `Transferencia Bancaria\\n`;
+                message += `Transferencia Bancaria\n`;
                 const banks = settings?.paymentMethods?.banks || [];
                 const selectedBank = banks.find((b: any) => b.bankName === customer.selectedBank);
                 if (selectedBank) {
-                    message += `Banco: ${selectedBank.bankName}\\n`;
-                    message += `Cuenta: ${selectedBank.accountNumber}\\n`;
-                    message += `Titular: ${selectedBank.accountHolder}\\n`;
+                    message += `Banco: ${selectedBank.bankName}\n`;
+                    message += `Cuenta: ${selectedBank.accountNumber}\n`;
+                    message += `Titular: ${selectedBank.accountHolder}\n`;
                 }
             }
         }
 
         if (uploadedImageUrl) {
-            message += `\\n*Comprobante:* ${uploadedImageUrl}\\n`;
+            message += `\n*Comprobante:* ${uploadedImageUrl}`;
         }
 
         const encodedMessage = encodeURIComponent(message);
@@ -180,10 +186,15 @@ export default function CartModal({ settings }: { settings?: any }) {
             updates.deliveryCoords = undefined;
         }
 
-        // Reset address when city changes
+        // Reset address and deliveryCoords when city changes
         if (key === 'city') {
             updates.address = '';
             updates.deliveryCoords = undefined;
+            // If switching to La Ceiba, clear address and deliveryCoords so field disables immediately
+            if (value === 'La Ceiba') {
+                updates.address = '';
+                updates.deliveryCoords = undefined;
+            }
         }
 
         setCustomer({ ...(customer || {}), ...updates });
@@ -363,11 +374,11 @@ export default function CartModal({ settings }: { settings?: any }) {
                                         <div>
                                             <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Dirección *</label>
                                             <input
-                                                className={`w-full border rounded-lg p-3 ${formErrors.address ? 'border-red-500' : 'border-gray-200'} ${isLaCeibaSelected && customer?.deliveryCoords ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                                className={`w-full border rounded-lg p-3 ${formErrors.address ? 'border-red-500' : 'border-gray-200'} ${isLaCeibaSelected ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                                 value={customer?.address || ''}
-                                                onChange={(e) => !isLaCeibaSelected || !customer?.deliveryCoords ? onCustomerChange('address', e.target.value) : null}
+                                                onChange={(e) => !isLaCeibaSelected ? onCustomerChange('address', e.target.value) : null}
                                                 placeholder={isLaCeibaSelected ? "Use el botón 'Usar Mi Ubicación'" : "Ingrese su dirección completa"}
-                                                readOnly={isLaCeibaSelected && !!customer?.deliveryCoords}
+                                                readOnly={isLaCeibaSelected}
                                             />
                                             {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
 
@@ -393,12 +404,13 @@ export default function CartModal({ settings }: { settings?: any }) {
                                                     />
                                                 </div>
                                             )}
-                                            {isLaCeibaSelected && deliveryPrice === 0 && (
+                                            {isLaCeibaSelected && !customer?.deliveryCoords ? (
+                                                <p className="text-gray-600 text-xs mt-1">Costo de envío: Por calcular</p>
+                                            ) : isLaCeibaSelected && deliveryPrice === 0 ? (
                                                 <p className="text-green-600 text-xs mt-1 font-bold">¡Envío Gratis en zona céntrica!</p>
-                                            )}
-                                            {deliveryPrice > 0 && (
+                                            ) : deliveryPrice > 0 ? (
                                                 <p className="text-gray-600 text-xs mt-1">Costo de envío: {formatPrice(deliveryPrice)}</p>
-                                            )}
+                                            ) : null}
                                         </div>
                                     )}
 
@@ -541,7 +553,11 @@ export default function CartModal({ settings }: { settings?: any }) {
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-600">
                                     <span>Envío</span>
-                                    <span>L. {deliveryPrice.toFixed(2)}</span>
+                                        <span>
+                                            {(!customer?.city || (isLaCeibaSelected && !customer?.deliveryCoords))
+                                                ? 'Por calcular'
+                                                : `L. ${deliveryPrice.toFixed(2)}`}
+                                        </span>
                                 </div>
                                 <div className="flex justify-between text-xl font-bold border-t pt-4">
                                     <span>Total</span>
