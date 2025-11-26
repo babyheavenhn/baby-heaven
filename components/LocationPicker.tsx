@@ -1,5 +1,6 @@
 "use client";
-import { Navigation } from 'lucide-react';
+import { useState } from 'react';
+import { Navigation, Loader2 } from 'lucide-react';
 
 interface LocationPickerProps {
     onLocationSelect: (address: string, coords: { lat: number; lng: number }) => void;
@@ -7,29 +8,57 @@ interface LocationPickerProps {
 }
 
 export default function LocationPicker({ onLocationSelect }: LocationPickerProps) {
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleUseMyLocation = () => {
         if (!navigator.geolocation) {
             alert('Tu navegador no soporta geolocalización');
             return;
         }
 
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const coords = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                };
+        setIsLoading(true);
 
-                // Create Google Maps link
-                const mapsLink = `https://maps.google.com/?q=${coords.lat},${coords.lng}`;
-                const address = `${mapsLink}`;
+        const handleSuccess = (position: GeolocationPosition) => {
+            const coords = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };
 
-                onLocationSelect(address, coords);
-            },
-            (error) => {
-                console.error('Error getting location:', error);
+            // Create Google Maps link
+            const mapsLink = `https://maps.google.com/?q=${coords.lat},${coords.lng}`;
+            const address = `${mapsLink}`;
+
+            onLocationSelect(address, coords);
+            setIsLoading(false);
+        };
+
+        const handleError = (error: GeolocationPositionError) => {
+            console.error('Error getting location:', error);
+            
+            // If high accuracy failed, try without it (fallback for desktop)
+            if (error.code === error.TIMEOUT) {
+                navigator.geolocation.getCurrentPosition(
+                    handleSuccess,
+                    (fallbackError) => {
+                        console.error('Fallback location error:', fallbackError);
+                        setIsLoading(false);
+                        alert('No pudimos obtener tu ubicación. Por favor, intenta de nuevo.');
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 15000,
+                        maximumAge: 60000,
+                    }
+                );
+            } else {
+                setIsLoading(false);
                 alert('No pudimos obtener tu ubicación. Por favor, intenta de nuevo.');
-            },
+            }
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            handleSuccess,
+            handleError,
             {
                 enableHighAccuracy: true,
                 timeout: 10000,
@@ -42,10 +71,20 @@ export default function LocationPicker({ onLocationSelect }: LocationPickerProps
         <button
             type="button"
             onClick={handleUseMyLocation}
-            className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 text-white font-bold py-3 px-4 rounded-lg transition-colors text-sm"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 disabled:bg-secondary/60 disabled:cursor-wait text-white font-bold py-3 px-4 rounded-lg transition-colors text-sm"
         >
-            <Navigation size={18} />
-            <span>Usar Mi Ubicación</span>
+            {isLoading ? (
+                <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Obteniendo ubicación...</span>
+                </>
+            ) : (
+                <>
+                    <Navigation size={18} />
+                    <span>Usar Mi Ubicación</span>
+                </>
+            )}
         </button>
     );
 }
