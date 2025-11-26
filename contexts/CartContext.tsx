@@ -15,7 +15,20 @@ export interface CartItem {
     maxStock?: number;
 }
 
-// ... (CustomerInfo interface remains same)
+
+export interface CustomerInfo {
+    name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    notes?: string;
+    deliveryCoords?: { lat: number; lng: number };
+    paymentMethod?: string;
+    cashChange?: string;
+    selectedBank?: string;
+}
 
 interface CartContextType {
     items: CartItem[];
