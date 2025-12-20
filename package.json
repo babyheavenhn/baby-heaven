@@ -15,6 +15,7 @@
         "@sanity/vision": "^4.17.0",
         "@vercel/blob": "^2.0.0",
         "clsx": "^2.1.1",
+        "csv-parser": "^3.2.0",
         "dotenv": "^17.2.3",
         "framer-motion": "^12.23.24",
         "lucide-react": "^0.554.0",

@@ -26,7 +26,6 @@ export default defineType({
             title: 'Categoría',
             type: 'reference',
             to: [{ type: 'category' }],
-            validation: (Rule) => Rule.required(),
         }),
         defineField({
             name: 'price',
@@ -51,7 +50,6 @@ export default defineType({
             title: 'Descripción Corta',
             type: 'text',
             rows: 3,
-            validation: (Rule) => Rule.required(),
         }),
         defineField({
             name: 'detailedDescription',
@@ -74,7 +72,6 @@ export default defineType({
             options: {
                 hotspot: true,
             },
-            validation: (Rule) => Rule.required(),
         }),
         defineField({
             name: 'gallery',
