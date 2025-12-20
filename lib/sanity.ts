@@ -6,9 +6,17 @@ export { client, urlFor }
 // GROQ queries
 export const HERO_QUERY = `*[_type == "hero"] | order(order asc)`
 
-export const CATEGORIES_QUERY = `*[_type == "category"] | order(order asc)`
+export const CATEGORIES_QUERY = `*[_type == "category"] | order(order asc){
+  _id,
+  name,
+  slug
+}`
 
-export const TWO_CATEGORIES_QUERY = `*[_type == "category"] | order(order asc)[0...2]`
+export const TWO_CATEGORIES_QUERY = `*[_type == "category"] | order(order asc)[0...2]{
+  _id,
+  name,
+  slug
+}`
 
 export const PRODUCTS_QUERY = `*[_type == "product" && inStock == true] | order(createdAt desc){
   _id,
