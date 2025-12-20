@@ -15,7 +15,10 @@ export const CATEGORIES_QUERY = `*[_type == "category"] | order(order asc){
 export const TWO_CATEGORIES_QUERY = `*[_type == "category"] | order(order asc)[0...2]{
   _id,
   name,
-  slug
+  slug,
+  description,
+  backgroundImage,
+  buttonText
 }`
 
 export const PRODUCTS_QUERY = `*[_type == "product" && inStock == true] | order(createdAt desc){
