@@ -1,4 +1,4 @@
-import { client, CATEGORIES_QUERY, SITE_SETTINGS_QUERY, PRODUCT_BY_SLUG_QUERY } from '@/lib/sanity';
+import { client, CATEGORIES_QUERY, SITE_SETTINGS_QUERY, PRODUCT_BY_SLUG_QUERY, urlFor } from '@/lib/sanity';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProductDetailClient from '@/components/ProductDetailClient';
@@ -32,21 +32,63 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     return {
-        title: product.name,
-        description: product.description || `${product.name} en Baby Heaven Honduras`,
+        title: `${product.name} | Baby Heaven`,
+        description: product.description || `${product.name} en Baby Heaven Honduras. Productos que te harán la crianza de tu bebé más fácil.`,
+        openGraph: {
+            title: `${product.name} | Baby Heaven`,
+            description: product.description || `${product.name} en Baby Heaven Honduras`,
+            images: [
+                {
+                    url: product.image ? urlFor(product.image).width(1200).height(630).url() : '/logo.jpg',
+                    width: 1200,
+                    height: 630,
+                    alt: product.name,
+                },
+            ],
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${product.name} | Baby Heaven`,
+            description: product.description || `${product.name} en Baby Heaven Honduras`,
+            images: [product.image ? urlFor(product.image).width(1200).height(630).url() : '/logo.jpg'],
+        },
     };
 }
 
 export default async function ProductPage({ params }: Props) {
-    const { slug } = await params;
+    const { slug, category } = await params;
     const { product, categories, settings } = await getProductData(slug);
 
     if (!product) {
         notFound();
     }
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.name,
+        image: product.image ? urlFor(product.image).url() : undefined,
+        description: product.description,
+        brand: {
+            '@type': 'Brand',
+            name: 'Baby Heaven'
+        },
+        offers: {
+            '@type': 'Offer',
+            url: `https://babyheavenhn.com/products/${category}/${product.slug.current}`,
+            priceCurrency: product.currency || 'HNL',
+            price: product.price,
+            availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
+        }
+    };
+
     return (
         <main>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Navbar categories={categories} logo={settings?.logo} />
 
             <div className="container mx-auto px-4 py-16">
