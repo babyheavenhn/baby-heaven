@@ -19,7 +19,7 @@ export default function Navbar({ categories = [], logo }: NavbarProps) {
 
     return (
         <nav className="sticky top-0 z-50 shadow-lg w-full" style={{ backgroundColor: '#ffffff' }}>
-            <div className="container mx-auto px-4 py-4" style={{ backgroundColor: '#ffffff' }}>
+            <div className="container mx-auto py-2" style={{ backgroundColor: '#ffffff' }}>
                 <div className="flex items-center justify-between">
                     {/* Logo with animation */}
                     <Link href="/" className="flex items-center gap-2 hover:scale-105 transition-transform">
@@ -29,11 +29,11 @@ export default function Navbar({ categories = [], logo }: NavbarProps) {
                                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                             >
                                 <Image
-                                    src={urlFor(logo).width(120).height(60).url()}
+                                    src="/logo.jpg"
                                     alt="Baby Heaven"
-                                    width={120}
-                                    height={60}
-                                    className="h-14 w-auto"
+                                    width={200}
+                                    height={200}
+                                    className="h-30 w-auto object-contain"
                                 />
                             </motion.div>
                         ) : (
@@ -56,9 +56,9 @@ export default function Navbar({ categories = [], logo }: NavbarProps) {
                             <span className="relative z-10">Catálogo</span>
                             <span className="absolute bottom-0 left-0 w-0 h-1 bg-primary group-hover:w-full transition-all duration-300"></span>
                         </Link>
-                        
+
                         {/* Categories Dropdown */}
-                        <div 
+                        <div
                             className="relative"
                             onMouseEnter={() => setIsCategoriesOpen(true)}
                             onMouseLeave={() => setIsCategoriesOpen(false)}
@@ -70,7 +70,7 @@ export default function Navbar({ categories = [], logo }: NavbarProps) {
                                 <ChevronDown className={`w-4 h-4 transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
                                 <span className="absolute bottom-0 left-0 w-0 h-1 bg-primary group-hover:w-full transition-all duration-300"></span>
                             </button>
-                            
+
                             <AnimatePresence>
                                 {isCategoriesOpen && (
                                     <motion.div

@@ -21,7 +21,7 @@ export const TWO_CATEGORIES_QUERY = `*[_type == "category"] | order(order asc)[0
   buttonText
 }`
 
-export const PRODUCTS_QUERY = `*[_type == "product" && inStock == true] | order(createdAt desc){
+export const PRODUCTS_QUERY = `*[_type == "product" && inStock == true && defined(image.asset)] | order(createdAt desc){
   _id,
   name,
   slug,
@@ -34,7 +34,7 @@ export const PRODUCTS_QUERY = `*[_type == "product" && inStock == true] | order(
   isNew
 }`
 
-export const NEW_PRODUCTS_QUERY = `*[_type == "product" && inStock == true && dateTime(createdAt) > dateTime(now()) - 60*60*24*30] | order(createdAt desc)[0...6]{
+export const NEW_PRODUCTS_QUERY = `*[_type == "product" && inStock == true && dateTime(createdAt) > dateTime(now()) - 60*60*24*30 && defined(image.asset)] | order(createdAt desc)[0...6]{
   _id,
   name,
   slug,
@@ -46,7 +46,7 @@ export const NEW_PRODUCTS_QUERY = `*[_type == "product" && inStock == true && da
   inStock
 }`
 
-export const NEWEST_PRODUCTS_FALLBACK_QUERY = `*[_type == "product" && inStock == true] | order(createdAt desc)[0...6]{
+export const NEWEST_PRODUCTS_FALLBACK_QUERY = `*[_type == "product" && inStock == true && defined(image.asset)] | order(createdAt desc)[0...6]{
   _id,
   name,
   slug,
@@ -58,7 +58,7 @@ export const NEWEST_PRODUCTS_FALLBACK_QUERY = `*[_type == "product" && inStock =
   inStock
 }`
 
-export const CATEGORY_PRODUCTS_QUERY = `*[_type == "product" && category._ref == $categoryId && inStock == true] | order(createdAt desc){
+export const CATEGORY_PRODUCTS_QUERY = `*[_type == "product" && category._ref == $categoryId && inStock == true && defined(image.asset)] | order(createdAt desc){
   _id,
   name,
   slug,

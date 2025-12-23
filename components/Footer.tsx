@@ -18,11 +18,11 @@ export default function Footer({ settings, categories = [] }: FooterProps) {
                         <Link href="/" className="inline-block mb-4">
                             {settings?.logo ? (
                                 <Image
-                                    src={urlFor(settings.logo).width(150).height(75).url()}
+                                    src="/logo.jpg"
                                     alt="Baby Heaven"
-                                    width={150}
-                                    height={75}
-                                    className="h-16 w-auto"
+                                    width={180}
+                                    height={180}
+                                    className="h-50 w-auto object-contain"
                                 />
                             ) : (
                                 <span className="text-2xl font-bold text-primary">Baby Heaven</span>
